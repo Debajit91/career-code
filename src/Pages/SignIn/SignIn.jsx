@@ -1,11 +1,26 @@
-import React from 'react';
+import React, { use } from 'react';
 import SignInLottie from '../../assets/Lotties/SignIn.json';
 import Lottie from 'lottie-react';
+import { AuthContext } from '../../Contexts/AuthContext/AuthContext';
 
 const SignIn = () => {
+    const {signInUser} = use(AuthContext);
 
     const handleSignIn = e =>{
         e.preventDefault();
+
+        const form = e.target;
+        const email = form.email.value;
+        const password = form.password.value;
+        
+        // Sign In User
+        signInUser( email, password)
+        .then(result =>{
+            console.log(result.user);
+        })
+        .catch(error =>{
+            console.log(error);
+        })
     }
     return (
         <div className="hero bg-base-200 min-h-screen">
