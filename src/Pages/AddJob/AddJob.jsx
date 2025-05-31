@@ -1,35 +1,66 @@
 import React from "react";
 import useAuth from "../../Hooks/useAuth";
+import axios from "axios";
+import Swal from "sweetalert2";
 
 const AddJob = () => {
-    const {user} = useAuth();
-    const handleAddJob = e =>{
-        e.preventDefault();
-        const form = e.target;
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData.entries());
+  const { user } = useAuth();
+  const handleAddJob = (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
 
-        // Process salary range data
-        const {min, max , currency, ...newJob} = data;
-        newJob.salaryRange = {
-            min, max, currency
+    // Process salary range data
+    const { min, max, currency, ...newJob } = data;
+    newJob.salaryRange = {
+      min,
+      max,
+      currency,
+    };
+
+    // Process requirements
+    // Way -1
+    // const requirementsString = newJob.requirements;
+    // const requirementsDirty = requirementsString.split(',');
+    // const requirementsClean = requirementsDirty.map(req => req.trim());
+    // newJob.requirements = requirementsClean;
+
+    // Way -2
+    // const requirements = newJob.requirements.split(',').map(req => req.trim());
+    // newJob.requirements = requirements;
+
+    // Way -3
+    newJob.requirements = newJob.requirements
+      .split(",")
+      .map((req) => req.trim());
+
+    // Process Responsibilities
+    newJob.responsibilities = newJob.responsibilities
+      .split(",")
+      .map((res) => res.trim());
+
+    newJob.status = "active";
+
+    // save jobs to the db
+    axios
+      .post("http://localhost:3000/jobs", newJob)
+      .then((res) => {
+        if (res.data.insertedId) {
+          Swal.fire({
+            position: "top-end",
+            icon: "success",
+            title: "New Job has been saved",
+            showConfirmButton: false,
+            timer: 1500,
+          });
         }
-
-        // Process requirements
-        // Way -1
-        // const requirementsString = newJob.requirements;
-        // const requirementsDirty = requirementsString.split(',');
-        // const requirementsClean = requirementsDirty.map(req => req.trim());
-        // newJob.requirements = requirementsClean;
-
-        // Way -2
-        // const requirements = newJob.requirements.split(',').map(req => req.trim());
-        // newJob.requirements = requirements;
-
-        // Way -3
-        newJob.requirements = newJob.requirements.split(',').map(req => req.trim());
-        console.log(newJob);
-    }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    console.log(newJob);
+  };
   return (
     <div className="mx-auto w-xs">
       <h2 className="text-center text-2xl">Please Add a Job</h2>
@@ -83,18 +114,23 @@ const AddJob = () => {
             <input
               className="btn"
               type="radio"
-              name="jobType" value='On-Site'
+              name="jobType"
+              value="On-Site"
               aria-label="On Site"
             />
             <input
               className="btn"
               type="radio"
-              name="jobType" value='Remote'    aria-label="Remote"
+              name="jobType"
+              value="Remote"
+              aria-label="Remote"
             />
             <input
               className="btn"
               type="radio"
-              name="jobType" value='Hybrid'       aria-label="Hybrid"
+              name="jobType"
+              value="Hybrid"
+              aria-label="Hybrid"
             />
           </div>
         </fieldset>
@@ -116,7 +152,7 @@ const AddJob = () => {
         {/* Application Deadline */}
         <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">
           <legend className="fieldset-legend">Application Deadline</legend>
-          <input type="date" className="input" />
+          <input type="date" name="applicationDeadline" className="input" />
         </fieldset>
 
         {/* Salary Range */}
@@ -204,12 +240,14 @@ const AddJob = () => {
           <label className="label">HR Email</label>
           <input
             type="email"
-            name="hr_email" defaultValue={user.email} readOnly
+            name="hr_email"
+            defaultValue={user.email}
+            readOnly
             className="input"
             placeholder="HR Email"
           />
 
-            <input type="submit" className="btn" value="Add Job" />
+          <input type="submit" className="btn" value="Add Job" />
         </fieldset>
       </form>
     </div>
