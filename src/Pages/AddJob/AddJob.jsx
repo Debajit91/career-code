@@ -59,7 +59,7 @@ const AddJob = () => {
       .catch((error) => {
         console.log(error);
       });
-    console.log(newJob);
+    
   };
   return (
     <div className="mx-auto w-xs">
